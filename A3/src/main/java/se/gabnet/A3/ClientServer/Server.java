@@ -1,6 +1,6 @@
-package ClientServer;
+package se.gabnet.A3.ClientServer;
 
-import Shared.DatabaseAccess;
+import se.gabnet.A3.Shared.DatabaseAccess;
 
 import java.io.*;
 import java.net.ServerSocket;

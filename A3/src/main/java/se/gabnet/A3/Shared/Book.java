@@ -1,4 +1,4 @@
-package Shared;
+package se.gabnet.A3.Shared;
 
 public class Book {
 

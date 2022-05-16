@@ -1,4 +1,4 @@
-package ClientServer;
+package se.gabnet.A3.ClientServer;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;

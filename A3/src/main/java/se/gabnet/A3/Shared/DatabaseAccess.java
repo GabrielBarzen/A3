@@ -1,4 +1,4 @@
-package Shared;
+package se.gabnet.A3.Shared;
 
 import java.sql.*;
 import java.util.ArrayList;
