@@ -8,7 +8,6 @@ import java.util.List;
 
 @RestController
 public class Service {
-
     @GetMapping("/books")
     public List<?> getAllBooks() {
         return new DatabaseAccess().f_get_books();
