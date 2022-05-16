@@ -1,42 +1,69 @@
 package se.gabnet.A3.SOA;
 
 import org.springframework.web.reactive.function.client.WebClient;
+
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.concurrent.CountDownLatch;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
 
-public class SOAClient extends Thread {
-    private static long startTime;
-    private static long endTime;
-    private static int numClients;
-    private static CountDownLatch latch;
+public class SOAClient {
+    private long startTime;
+    private long endTime;
+    private int numClients;
+    private int numRuns;
+    private CountDownLatch latch;
+    private long[] runtimes;
 
 
 
-    public static void main(String[] args) throws InterruptedException {
+    public SOAClient(int numClients, int numRuns) {
+        this.numClients = numClients;
+        this.numRuns = numRuns;
+        runtimes = new long[this.numRuns];
 
-        numClients = 50;
-        latch = new CountDownLatch(numClients);
+        ExecutorService tp = Executors.newFixedThreadPool(10);
 
-        startTime = System.currentTimeMillis();
+        for (int i = 0; i < this.numRuns; i++) {
+            latch = new CountDownLatch(this.numClients);
 
-        for (int i = 0; i < numClients; i++) {
-            new SOAClient().start();
+            startTime = System.currentTimeMillis();
+            for (int j = 0; j < this.numClients; j++) {
+                tp.execute(new requester());
+            }
+            try {
+                latch.await();
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+            endTime = System.currentTimeMillis();
+
+            runtimes[i] = endTime  - startTime;
         }
-        latch.await();
-        endTime = System.currentTimeMillis();
-        System.out.println("Time taken : " + (endTime - startTime));
+        System.out.println("num clients : " + this.numClients + ", times : " + Arrays.toString(runtimes));
+        int total = 0;
+        for (long runtime : runtimes) {
+            total += runtime;
+        }
+        System.out.println("Avg for num : " + this.numClients + " = " + total/runtimes.length);
+
     }
 
-    @Override
-    public void run() {
-        WebClient client = WebClient.create();
+    class requester extends Thread {
+        @Override
+        public void run() {
+            WebClient client = WebClient.create();
 
-        WebClient.ResponseSpec responseSpec = client.get()
-                .uri("http://localhost:8080/books")
-                .retrieve();
+            WebClient.ResponseSpec responseSpec = client.get()
+                    .uri("http://localhost:8080/books")
+                    .retrieve();
 
-        System.out.println(responseSpec.bodyToMono(String.class).block());
+            responseSpec.bodyToMono(String.class).block();
 
 
-        latch.countDown();
+            latch.countDown();
+        }
     }
 }
